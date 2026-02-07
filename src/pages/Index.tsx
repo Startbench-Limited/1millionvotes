@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import PledgeCounter from "@/components/PledgeCounter";
 import FeaturesSection from "@/components/FeaturesSection";
+import NigeriaMapSection from "@/components/NigeriaMapSection";
 import RegisterSection from "@/components/RegisterSection";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import VolunteerSection from "@/components/VolunteerSection";
@@ -15,6 +16,7 @@ const Index = () => {
         <HeroSection />
         <PledgeCounter />
         <FeaturesSection />
+        <NigeriaMapSection />
         <RegisterSection />
         <LeaderboardSection />
         <VolunteerSection />
