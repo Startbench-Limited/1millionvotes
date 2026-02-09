@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SocialShareButtons from "@/components/SocialShareButtons";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
@@ -70,6 +71,15 @@ const HeroSection = () => {
             >
               Track Progress
             </Button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="mt-8 flex justify-center"
+          >
+            <SocialShareButtons variant="compact" />
           </motion.div>
         </motion.div>
 

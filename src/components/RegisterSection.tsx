@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SocialShareButtons from "@/components/SocialShareButtons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -134,6 +135,7 @@ const RegisterSection = () => {
               <p className="text-muted-foreground mb-6">
                 Thank you for joining the 1 Million Pledge movement. Share with others!
               </p>
+              <SocialShareButtons className="mb-6" />
               <Button
                 variant="outline"
                 onClick={() => setSubmitted(false)}
