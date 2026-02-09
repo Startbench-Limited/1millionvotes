@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import campaignLogo from "@/assets/campaign-logo.png";
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -17,14 +18,12 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="#home" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-lg">1M</span>
-          </div>
-          <div className="hidden sm:block">
-            <p className="font-heading font-bold text-sm leading-tight text-foreground">1 Million Pledge</p>
-            <p className="text-xs text-muted-foreground leading-tight">For Tinubu & Abba</p>
-          </div>
+        <a href="#home" className="flex items-center">
+          <img
+            src={campaignLogo}
+            alt="Tinubu & Abba 1 Million Pledge 2027"
+            className="h-12 w-auto object-contain"
+          />
         </a>
 
         {/* Desktop nav */}

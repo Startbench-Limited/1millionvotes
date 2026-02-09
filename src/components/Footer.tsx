@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import campaignLogo from "@/assets/campaign-logo.png";
 
 const Footer = () => {
   return (
@@ -7,14 +8,12 @@ const Footer = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center">
-                <span className="font-heading font-bold text-primary-foreground text-sm">1M</span>
-              </div>
-              <div>
-                <p className="font-heading font-bold text-sm">1 Million Pledge</p>
-                <p className="text-xs text-primary-foreground/60">For Tinubu & Abba</p>
-              </div>
+            <div className="mb-4">
+              <img
+                src={campaignLogo}
+                alt="Tinubu & Abba 1 Million Pledge 2027"
+                className="h-14 w-auto object-contain brightness-0 invert"
+              />
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               A historic grassroots movement uniting Nigerians in support of progressive governance and national development.
