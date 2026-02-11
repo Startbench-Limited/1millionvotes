@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import campaignLogo from "@/assets/campaign-logo.png";
@@ -41,9 +42,16 @@ const Header = () => {
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="default" size="sm" className="font-heading font-semibold shadow-primary">
-            Pledge Now
-          </Button>
+          <Link to="/dashboard">
+            <Button variant="outline" size="sm" className="font-heading font-semibold">
+              My Dashboard
+            </Button>
+          </Link>
+          <Link to="/admin">
+            <Button variant="default" size="sm" className="font-heading font-semibold shadow-primary">
+              Admin
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -70,9 +78,16 @@ const Header = () => {
                 {item.label}
               </a>
             ))}
-            <Button variant="default" className="mt-2 font-heading font-semibold shadow-primary">
-              Pledge Now
-            </Button>
+            <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+              <Button variant="outline" className="w-full mt-2 font-heading font-semibold">
+                My Dashboard
+              </Button>
+            </Link>
+            <Link to="/admin" onClick={() => setMobileOpen(false)}>
+              <Button variant="default" className="w-full mt-2 font-heading font-semibold shadow-primary">
+                Admin
+              </Button>
+            </Link>
           </nav>
         </div>
       )}
