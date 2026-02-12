@@ -19,27 +19,29 @@ const HeroSection = () => {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-hero opacity-80" />
 
-      {/* Left candidates */}
+      {/* Left candidates - anchored bottom-left, full opacity */}
       <motion.div
-        initial={{ opacity: 0, x: -80 }}
+        initial={{ opacity: 0, x: -60 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.9, delay: 0.3 }}
-        className="absolute left-0 bottom-0 z-10 w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] pointer-events-none"
+        className="absolute left-[-2%] bottom-0 z-10 hidden sm:block pointer-events-none"
+        style={{ width: "clamp(260px, 30vw, 500px)" }}
       >
         <img
           src={candidatesImg}
           alt="Tinubu and Abba candidates"
           className="w-full h-auto object-contain"
-          style={{ clipPath: "inset(0 50% 0 0)" }}
+          style={{ clipPath: "inset(0 52% 0 0)" }}
         />
       </motion.div>
 
-      {/* Right candidates (faded) */}
+      {/* Right candidates - anchored mid-right, faded */}
       <motion.div
-        initial={{ opacity: 0, x: 80 }}
-        animate={{ opacity: 0.35, x: 0 }}
-        transition={{ duration: 0.9, delay: 0.3 }}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-[240px] sm:w-[300px] md:w-[360px] lg:w-[420px] pointer-events-none"
+        initial={{ opacity: 0, x: 60 }}
+        animate={{ opacity: 0.45, x: 0 }}
+        transition={{ duration: 0.9, delay: 0.4 }}
+        className="absolute right-[-2%] top-[10%] z-10 hidden md:block pointer-events-none"
+        style={{ width: "clamp(220px, 26vw, 440px)" }}
       >
         <img
           src={candidatesImg}
