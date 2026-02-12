@@ -19,35 +19,18 @@ const HeroSection = () => {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-hero opacity-80" />
 
-      {/* Left candidates - anchored bottom-left, full opacity */}
+      {/* Candidates overlay - full width with built-in left/right layout */}
       <motion.div
-        initial={{ opacity: 0, x: -60 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.9, delay: 0.3 }}
-        className="absolute left-[-2%] bottom-0 z-10 hidden sm:block pointer-events-none"
-        style={{ width: "clamp(260px, 30vw, 500px)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.3 }}
+        className="absolute inset-0 z-10 pointer-events-none flex items-end"
       >
         <img
           src={candidatesImg}
           alt="Tinubu and Abba candidates"
-          className="w-full h-auto object-contain"
-          style={{ clipPath: "inset(0 52% 0 0)" }}
-        />
-      </motion.div>
-
-      {/* Right candidates - anchored mid-right, faded */}
-      <motion.div
-        initial={{ opacity: 0, x: 60 }}
-        animate={{ opacity: 0.45, x: 0 }}
-        transition={{ duration: 0.9, delay: 0.4 }}
-        className="absolute right-[-2%] top-[10%] z-10 hidden md:block pointer-events-none"
-        style={{ width: "clamp(220px, 26vw, 440px)" }}
-      >
-        <img
-          src={candidatesImg}
-          alt=""
-          className="w-full h-auto object-contain"
-          style={{ clipPath: "inset(0 0 0 50%)" }}
+          className="w-full h-auto object-contain object-bottom"
+          style={{ maxHeight: "95%" }}
         />
       </motion.div>
 
