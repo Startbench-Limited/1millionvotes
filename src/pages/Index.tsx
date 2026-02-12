@@ -2,9 +2,8 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import PledgeCounter from "@/components/PledgeCounter";
 import FeaturesSection from "@/components/FeaturesSection";
-import NigeriaMapSection from "@/components/NigeriaMapSection";
+import PledgeMapLeaderboardSection from "@/components/PledgeMapLeaderboardSection";
 import RegisterSection from "@/components/RegisterSection";
-import LeaderboardSection from "@/components/LeaderboardSection";
 import CampaignGallerySection from "@/components/CampaignGallerySection";
 import VolunteerSection from "@/components/VolunteerSection";
 import Footer from "@/components/Footer";
@@ -17,9 +16,8 @@ const Index = () => {
         <HeroSection />
         <PledgeCounter />
         <FeaturesSection />
-        <NigeriaMapSection />
+        <PledgeMapLeaderboardSection />
         <RegisterSection />
-        <LeaderboardSection />
         <CampaignGallerySection />
         <VolunteerSection />
       </main>
