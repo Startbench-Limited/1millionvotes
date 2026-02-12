@@ -3,6 +3,7 @@ import { ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SocialShareButtons from "@/components/SocialShareButtons";
 import heroBg from "@/assets/hero-bg.jpg";
+import candidatesImg from "@/assets/candidates.png";
 
 const HeroSection = () => {
   return (
@@ -18,13 +19,59 @@ const HeroSection = () => {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-hero opacity-80" />
 
+      {/* Left candidates */}
+      <motion.div
+        initial={{ opacity: 0, x: -80 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.9, delay: 0.3 }}
+        className="absolute left-0 bottom-0 z-10 w-[280px] sm:w-[340px] md:w-[400px] lg:w-[460px] pointer-events-none"
+      >
+        <img
+          src={candidatesImg}
+          alt="Tinubu and Abba candidates"
+          className="w-full h-auto object-contain"
+          style={{ clipPath: "inset(0 50% 0 0)" }}
+        />
+      </motion.div>
+
+      {/* Right candidates (faded) */}
+      <motion.div
+        initial={{ opacity: 0, x: 80 }}
+        animate={{ opacity: 0.35, x: 0 }}
+        transition={{ duration: 0.9, delay: 0.3 }}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-[240px] sm:w-[300px] md:w-[360px] lg:w-[420px] pointer-events-none"
+      >
+        <img
+          src={candidatesImg}
+          alt=""
+          className="w-full h-auto object-contain"
+          style={{ clipPath: "inset(0 0 0 50%)" }}
+        />
+      </motion.div>
+
+      {/* Bottom-right pledge text overlay */}
+      <motion.div
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 0.25, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
+        className="absolute bottom-8 right-4 sm:right-8 z-10 pointer-events-none hidden md:block"
+      >
+        <p className="font-heading text-primary-foreground italic leading-tight text-right">
+          <span className="text-xl lg:text-2xl block">TINUBU & ABBA 1-MILLION</span>
+          <span className="text-5xl lg:text-7xl font-black block" style={{ fontFamily: "'Dancing Script', cursive" }}>
+            Pledge
+          </span>
+          <span className="text-5xl lg:text-7xl font-black text-secondary">2027</span>
+        </p>
+      </motion.div>
+
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-32 text-center">
+      <div className="relative z-20 container mx-auto px-4 py-32 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto"
+          className="max-w-3xl mx-auto"
         >
           {/* Badge */}
           <motion.div
@@ -39,12 +86,12 @@ const HeroSection = () => {
             </span>
           </motion.div>
 
-          <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-7xl text-primary-foreground leading-tight mb-6">
+          <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-7xl text-primary-foreground leading-tight mb-2">
             1 Million Pledge
-            <span className="block text-secondary mt-2">
-              For Tinubu & Abba
-            </span>
           </h1>
+          <h2 className="font-heading font-black text-3xl sm:text-4xl md:text-6xl text-secondary leading-tight mb-6">
+            For Tinubu & Abba
+          </h2>
 
           <p className="text-lg sm:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10 font-body leading-relaxed">
             Stand with millions of Nigerians in a historic show of grassroots support.
