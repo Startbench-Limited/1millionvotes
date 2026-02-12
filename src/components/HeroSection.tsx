@@ -34,21 +34,6 @@ const HeroSection = () => {
         />
       </motion.div>
 
-      {/* Bottom-right pledge text overlay */}
-      <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 0.25, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.6 }}
-        className="absolute bottom-8 right-4 sm:right-8 z-10 pointer-events-none hidden md:block"
-      >
-        <p className="font-heading text-primary-foreground italic leading-tight text-right">
-          <span className="text-xl lg:text-2xl block">TINUBU & ABBA 1-MILLION</span>
-          <span className="text-5xl lg:text-7xl font-black block" style={{ fontFamily: "'Dancing Script', cursive" }}>
-            Pledge
-          </span>
-          <span className="text-5xl lg:text-7xl font-black text-secondary">2027</span>
-        </p>
-      </motion.div>
 
       {/* Content */}
       <div className="relative z-20 container mx-auto px-4 py-32 text-center">
