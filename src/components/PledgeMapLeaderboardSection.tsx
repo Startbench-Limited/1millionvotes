@@ -6,17 +6,22 @@ import {
   Geography,
 } from "react-simple-maps";
 import { statePledgeData, getColorScale, legendItems } from "@/data/nigeriaPledgeData";
-import { MapPin, TrendingUp, Trophy, Medal, Award } from "lucide-react";
+import { MapPin, TrendingUp, Trophy, Medal, Award, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const GEO_URL = "/nigeria-states.json";
 
-const leaderboard = [
+const allLeaderboard = [
   { rank: 1, state: "Lagos", ward: "Ikeja Central", pledges: 45892, growth: "+12.4%", icon: Trophy },
   { rank: 2, state: "Kano", ward: "Nassarawa GRA", pledges: 38741, growth: "+9.8%", icon: Medal },
   { rank: 3, state: "Rivers", ward: "Port Harcourt Central", pledges: 32156, growth: "+15.2%", icon: Award },
   { rank: 4, state: "Oyo", ward: "Ibadan North", pledges: 28493, growth: "+7.6%", icon: TrendingUp },
   { rank: 5, state: "Abuja FCT", ward: "Wuse II", pledges: 25187, growth: "+11.3%", icon: TrendingUp },
   { rank: 6, state: "Kaduna", ward: "Kaduna North", pledges: 22341, growth: "+8.1%", icon: TrendingUp },
+  { rank: 7, state: "Katsina", ward: "Katsina Central", pledges: 24560, growth: "+9.2%", icon: TrendingUp },
+  { rank: 8, state: "Borno", ward: "Maiduguri Central", pledges: 22560, growth: "+10.1%", icon: TrendingUp },
+  { rank: 9, state: "Bauchi", ward: "Bauchi Central", pledges: 21340, growth: "+9.5%", icon: TrendingUp },
+  { rank: 10, state: "Sokoto", ward: "Sokoto South", pledges: 20340, growth: "+8.9%", icon: TrendingUp },
 ];
 
 const rankColors = [
@@ -30,6 +35,7 @@ const PledgeMapLeaderboardSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const hoveredData = useMemo(() => {
     if (!hoveredState) return null;
@@ -41,23 +47,33 @@ const PledgeMapLeaderboardSection = () => {
     []
   );
 
+  const filteredLeaderboard = useMemo(() => {
+    if (!searchQuery.trim()) return allLeaderboard;
+    const q = searchQuery.toLowerCase();
+    return allLeaderboard.filter(
+      (entry) =>
+        entry.state.toLowerCase().includes(q) ||
+        entry.ward.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
   return (
-    <section ref={ref} className="py-20 bg-background" id="map">
+    <section ref={ref} className="py-12 sm:py-16 lg:py-20 bg-background" id="map">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
           {/* Left: Map */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7 }}
           >
-            <p className="font-heading font-semibold text-sm uppercase tracking-widest text-primary mb-3">
+            <p className="font-heading font-semibold text-xs sm:text-sm uppercase tracking-widest text-primary mb-2 sm:mb-3">
               Pledge Distribution
             </p>
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-foreground mb-2">
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
               Pledges Across Nigeria
             </h2>
-            <p className="text-muted-foreground max-w-md mb-6 text-sm">
+            <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
               Explore how pledges are distributed across all 36 states and the FCT.
               Hover over any state to see detailed statistics.
             </p>
@@ -110,7 +126,7 @@ const PledgeMapLeaderboardSection = () => {
               {/* Tooltip */}
               {hoveredData && (
                 <div
-                  className="absolute pointer-events-none z-20 bg-card border border-border rounded-xl shadow-elevated px-4 py-3 min-w-[200px] -translate-x-1/2 -translate-y-full"
+                  className="absolute pointer-events-none z-20 bg-card border border-border rounded-xl shadow-elevated px-4 py-3 min-w-[200px] -translate-x-1/2 -translate-y-full hidden sm:block"
                   style={{ left: tooltipPos.x, top: tooltipPos.y - 12 }}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -141,18 +157,18 @@ const PledgeMapLeaderboardSection = () => {
             </div>
 
             {/* Legend */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
               {legendItems.map((item) => (
                 <div key={item.label} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full border border-border" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{item.label}</span>
                 </div>
               ))}
             </div>
 
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground">
               Total pledges across all states:{" "}
-              <span className="font-heading font-bold text-primary text-base">{totalPledges.toLocaleString()}</span>
+              <span className="font-heading font-bold text-primary text-sm sm:text-base">{totalPledges.toLocaleString()}</span>
             </p>
           </motion.div>
 
@@ -162,42 +178,58 @@ const PledgeMapLeaderboardSection = () => {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            <p className="font-heading font-semibold text-sm uppercase tracking-widest text-primary mb-3">
+            <p className="font-heading font-semibold text-xs sm:text-sm uppercase tracking-widest text-primary mb-2 sm:mb-3">
               Top Supporters
             </p>
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-foreground mb-2">
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
               State Leaderboard
             </h2>
-            <p className="text-muted-foreground max-w-md mb-6 text-sm">
+            <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
               See which states and wards are leading the charge for 1 million pledges.
             </p>
 
-            <div className="space-y-3">
-              {leaderboard.map((entry, index) => (
+            {/* Search filter */}
+            <div className="relative mb-4">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search state or ward..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-11 text-sm"
+              />
+            </div>
+
+            <div className="space-y-2 sm:space-y-3 max-h-[500px] overflow-y-auto pr-1">
+              {filteredLeaderboard.length === 0 && (
+                <p className="text-center text-muted-foreground text-sm py-8">
+                  No states match your search.
+                </p>
+              )}
+              {filteredLeaderboard.map((entry, index) => (
                 <motion.div
                   key={entry.state}
                   initial={{ opacity: 0, x: 20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ delay: 0.3 + index * 0.08, duration: 0.5 }}
-                  className="flex items-center gap-4 bg-card rounded-xl p-4 shadow-card hover:shadow-elevated transition-all"
+                  className="flex items-center gap-3 sm:gap-4 bg-card rounded-xl p-3 sm:p-4 shadow-card hover:shadow-elevated transition-all"
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-heading font-bold text-sm shrink-0 ${
-                      rankColors[index] || "bg-muted text-foreground"
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-heading font-bold text-xs sm:text-sm shrink-0 ${
+                      rankColors[entry.rank - 1] || "bg-muted text-foreground"
                     }`}
                   >
                     {entry.rank}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-heading font-bold text-foreground truncate">{entry.state}</h3>
-                      {index < 3 && <entry.icon size={16} className="text-primary shrink-0" />}
+                      <h3 className="font-heading font-bold text-sm sm:text-base text-foreground truncate">{entry.state}</h3>
+                      {entry.rank <= 3 && <entry.icon size={14} className="text-primary shrink-0" />}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{entry.ward}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{entry.ward}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-heading font-bold text-lg text-foreground">{entry.pledges.toLocaleString()}</p>
-                    <p className="text-xs text-primary font-semibold">{entry.growth}</p>
+                    <p className="font-heading font-bold text-sm sm:text-lg text-foreground">{entry.pledges.toLocaleString()}</p>
+                    <p className="text-[10px] sm:text-xs text-primary font-semibold">{entry.growth}</p>
                   </div>
                 </motion.div>
               ))}
