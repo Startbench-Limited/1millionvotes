@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const states = [
   "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno",
@@ -26,18 +29,48 @@ const RegisterSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    toast.success("Your pledge has been registered successfully!", {
-      description: "Thank you for standing with the movement.",
+
+    if (!user) {
+      toast.error("Please sign in to register your pledge.", {
+        action: { label: "Sign In", onClick: () => navigate("/auth") },
+      });
+      return;
+    }
+
+    setLoading(true);
+    const form = new FormData(e.currentTarget);
+
+    const { error } = await supabase.from("pledges").insert({
+      user_id: user.id,
+      full_name: form.get("fullname") as string,
+      phone: form.get("phone") as string,
+      state: selectedState,
+      lga: form.get("lga") as string,
+      ward: form.get("ward") as string,
+      polling_unit: form.get("pu") as string,
     });
+
+    setLoading(false);
+
+    if (error) {
+      toast.error("Failed to register pledge. " + error.message);
+    } else {
+      setSubmitted(true);
+      toast.success("Your pledge has been registered successfully!", {
+        description: "Thank you for standing with the movement.",
+      });
+    }
   };
 
   return (
     <section ref={ref} className="py-20 bg-gradient-hero relative overflow-hidden" id="register">
-      {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-secondary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full translate-x-1/3 translate-y-1/3" />
 
@@ -68,27 +101,36 @@ const RegisterSection = () => {
               onSubmit={handleSubmit}
               className="bg-card rounded-2xl p-6 sm:p-8 shadow-elevated space-y-5"
             >
+              {!user && (
+                <div className="bg-muted rounded-lg p-3 text-center text-sm text-muted-foreground">
+                  <Button variant="link" className="text-primary p-0 h-auto" onClick={() => navigate("/auth")}>
+                    Sign in
+                  </Button>{" "}
+                  to register your pledge and track it on your dashboard.
+                </div>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="fullname" className="font-heading font-semibold text-sm">Full Name</Label>
-                  <Input id="fullname" placeholder="Enter your full name" required />
+                  <Input id="fullname" name="fullname" placeholder="Enter your full name" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="font-heading font-semibold text-sm">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="080XXXXXXXX" required />
+                  <Input id="phone" name="phone" type="tel" placeholder="080XXXXXXXX" required />
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="state" className="font-heading font-semibold text-sm">State</Label>
-                  <Select required>
+                  <Select required value={selectedState} onValueChange={setSelectedState}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your state" />
                     </SelectTrigger>
                     <SelectContent>
                       {states.map((state) => (
-                        <SelectItem key={state} value={state.toLowerCase()}>
+                        <SelectItem key={state} value={state}>
                           {state}
                         </SelectItem>
                       ))}
@@ -97,28 +139,29 @@ const RegisterSection = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lga" className="font-heading font-semibold text-sm">Local Government</Label>
-                  <Input id="lga" placeholder="Enter your LGA" required />
+                  <Input id="lga" name="lga" placeholder="Enter your LGA" required />
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="ward" className="font-heading font-semibold text-sm">Ward</Label>
-                  <Input id="ward" placeholder="Enter your ward" required />
+                  <Input id="ward" name="ward" placeholder="Enter your ward" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pu" className="font-heading font-semibold text-sm">Polling Unit</Label>
-                  <Input id="pu" placeholder="Enter PU code" required />
+                  <Input id="pu" name="pu" placeholder="Enter PU code" required />
                 </div>
               </div>
 
               <Button
                 type="submit"
                 size="lg"
+                disabled={loading}
                 className="w-full font-heading font-bold text-lg shadow-primary hover:scale-[1.02] transition-transform"
               >
-                Submit My Pledge
-                <ArrowRight className="ml-2" size={20} />
+                {loading ? "Submitting..." : "Submit My Pledge"}
+                {!loading && <ArrowRight className="ml-2" size={20} />}
               </Button>
             </motion.form>
           ) : (

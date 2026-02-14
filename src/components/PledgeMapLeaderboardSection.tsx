@@ -1,13 +1,15 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   ComposableMap,
   Geographies,
   Geography,
 } from "react-simple-maps";
-import { statePledgeData, getColorScale, legendItems } from "@/data/nigeriaPledgeData";
+import { statePledgeData, getColorScale, legendItems, StatePledgeData } from "@/data/nigeriaPledgeData";
 import { MapPin, TrendingUp, Trophy, Medal, Award, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MapBottomSheet from "@/components/MapBottomSheet";
 
 const GEO_URL = "/nigeria-states.json";
 
@@ -36,6 +38,9 @@ const PledgeMapLeaderboardSection = () => {
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [searchQuery, setSearchQuery] = useState("");
+  const [bottomSheetData, setBottomSheetData] = useState<StatePledgeData | null>(null);
+  const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const hoveredData = useMemo(() => {
     if (!hoveredState) return null;
@@ -57,6 +62,16 @@ const PledgeMapLeaderboardSection = () => {
     );
   }, [searchQuery]);
 
+  const handleStateClick = useCallback((stateName: string) => {
+    if (isMobile) {
+      const data = statePledgeData[stateName] ?? null;
+      if (data) {
+        setBottomSheetData(data);
+        setBottomSheetOpen(true);
+      }
+    }
+  }, [isMobile]);
+
   return (
     <section ref={ref} className="py-12 sm:py-16 lg:py-20 bg-background" id="map">
       <div className="container mx-auto px-4">
@@ -74,13 +89,14 @@ const PledgeMapLeaderboardSection = () => {
               Pledges Across Nigeria
             </h2>
             <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
-              Explore how pledges are distributed across all 36 states and the FCT.
-              Hover over any state to see detailed statistics.
+              {isMobile
+                ? "Tap any state to see detailed pledge statistics."
+                : "Hover over any state to see detailed statistics."}
             </p>
 
             <div
               className="relative"
-              onMouseLeave={() => setHoveredState(null)}
+              onMouseLeave={() => !isMobile && setHoveredState(null)}
             >
               <ComposableMap
                 projection="geoMercator"
@@ -101,16 +117,19 @@ const PledgeMapLeaderboardSection = () => {
                         <Geography
                           key={geo.rsmKey}
                           geography={geo}
+                          onClick={() => handleStateClick(stateName)}
                           onMouseEnter={(e) => {
+                            if (isMobile) return;
                             setHoveredState(stateName);
                             const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
                             if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
                           onMouseMove={(e) => {
+                            if (isMobile) return;
                             const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
                             if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
-                          onMouseLeave={() => setHoveredState(null)}
+                          onMouseLeave={() => !isMobile && setHoveredState(null)}
                           style={{
                             default: { fill: fillColor, stroke: "hsl(0, 0%, 100%)", strokeWidth: 0.8, outline: "none", transition: "fill 0.2s ease" },
                             hover: { fill: "hsl(120, 100%, 35%)", stroke: "hsl(0, 0%, 100%)", strokeWidth: 1.5, outline: "none", cursor: "pointer" },
@@ -123,10 +142,10 @@ const PledgeMapLeaderboardSection = () => {
                 </Geographies>
               </ComposableMap>
 
-              {/* Tooltip */}
-              {hoveredData && (
+              {/* Desktop Tooltip */}
+              {!isMobile && hoveredData && (
                 <div
-                  className="absolute pointer-events-none z-20 bg-card border border-border rounded-xl shadow-elevated px-4 py-3 min-w-[200px] -translate-x-1/2 -translate-y-full hidden sm:block"
+                  className="absolute pointer-events-none z-20 bg-card border border-border rounded-xl shadow-elevated px-4 py-3 min-w-[200px] -translate-x-1/2 -translate-y-full"
                   style={{ left: tooltipPos.x, top: tooltipPos.y - 12 }}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -188,7 +207,6 @@ const PledgeMapLeaderboardSection = () => {
               See which states and wards are leading the charge for 1 million pledges.
             </p>
 
-            {/* Search filter */}
             <div className="relative mb-4">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -237,6 +255,13 @@ const PledgeMapLeaderboardSection = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Mobile Bottom Sheet */}
+      <MapBottomSheet
+        open={bottomSheetOpen}
+        onOpenChange={setBottomSheetOpen}
+        data={bottomSheetData}
+      />
     </section>
   );
 };
