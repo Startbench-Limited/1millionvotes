@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, BarChart3, CheckCircle, Clock, Edit, Eye, FileText,
   Image, MoreHorizontal, Search, Settings, Shield, TrendingUp,
-  Users, UserCheck, Zap, Trash2
+  Users, UserCheck, Zap, Trash2, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,10 @@ import {
   useAdminStats, useTopStates, useAdminUsers,
   useVolunteerTasks, useCampaignContent
 } from "@/hooks/useAdminData";
+import {
+  useCreateContent, useUpdateContent, useDeleteContent, useToggleContentStatus
+} from "@/hooks/useContentMutations";
+import { ContentFormDialog, type ContentFormData } from "@/components/admin/ContentFormDialog";
 
 const chartConfig = {
   pledges: { label: "Pledges", color: "hsl(120, 100%, 25%)" },
@@ -32,11 +36,19 @@ const chartConfig = {
 
 const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [contentDialogOpen, setContentDialogOpen] = useState(false);
+  const [editingContent, setEditingContent] = useState<ContentFormData | null>(null);
+
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: topStates, isLoading: statesLoading } = useTopStates();
   const { data: users, isLoading: usersLoading } = useAdminUsers();
   const { data: volunteers, isLoading: volunteersLoading } = useVolunteerTasks();
   const { data: content, isLoading: contentLoading } = useCampaignContent();
+
+  const createContent = useCreateContent();
+  const updateContent = useUpdateContent();
+  const deleteContent = useDeleteContent();
+  const toggleStatus = useToggleContentStatus();
 
   const filteredUsers = (users ?? []).filter(u =>
     u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -47,6 +59,14 @@ const AdminDashboard = () => {
     if (s === "verified" || s === "published") return "bg-primary/10 text-primary border-primary/20";
     if (s === "pending" || s === "draft") return "bg-alert/10 text-alert-foreground border-alert/20";
     return "bg-destructive/10 text-destructive border-destructive/20";
+  };
+
+  const handleContentSubmit = (data: ContentFormData) => {
+    if (data.id) {
+      updateContent.mutate({ id: data.id, ...data }, { onSuccess: () => setContentDialogOpen(false) });
+    } else {
+      createContent.mutate(data, { onSuccess: () => setContentDialogOpen(false) });
+    }
   };
 
   const s = stats ?? { totalPledges: 0, verifiedPledges: 0, todayPledges: 0, weekGrowth: 0, activeVolunteers: 0, totalVolunteers: 0 };
@@ -283,7 +303,7 @@ const AdminDashboard = () => {
                     <CardTitle className="text-lg">Campaign Content</CardTitle>
                     <CardDescription>Manage news updates and gallery</CardDescription>
                   </div>
-                  <Button size="sm" className="font-heading font-semibold">+ Add Content</Button>
+                  <Button size="sm" className="font-heading font-semibold" onClick={() => { setEditingContent(null); setContentDialogOpen(true); }}>+ Add Content</Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -305,9 +325,18 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className={statusColor(item.status)}>{item.status}</Badge>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><Edit size={14} /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"><Trash2 size={14} /></Button>
+                          <Badge
+                            className={`${statusColor(item.status)} cursor-pointer`}
+                            onClick={() => toggleStatus.mutate({ id: item.id, currentStatus: item.status })}
+                          >
+                            {item.status === "published" ? <Globe size={10} className="mr-1" /> : <Clock size={10} className="mr-1" />}
+                            {item.status}
+                          </Badge>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            setEditingContent({ id: item.id, title: item.title, type: item.type, content: "", image_url: "", status: item.status });
+                            setContentDialogOpen(true);
+                          }}><Edit size={14} /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteContent.mutate(item.id)}><Trash2 size={14} /></Button>
                         </div>
                       </div>
                     ))}
@@ -317,6 +346,14 @@ const AdminDashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            <ContentFormDialog
+              open={contentDialogOpen}
+              onOpenChange={setContentDialogOpen}
+              onSubmit={handleContentSubmit}
+              initialData={editingContent}
+              isPending={createContent.isPending || updateContent.isPending}
+            />
           </TabsContent>
         </Tabs>
       </main>
