@@ -1,5 +1,5 @@
-import { MapPin, TrendingUp } from "lucide-react";
-import { LgaPledgeData } from "@/data/kanoPledgeData";
+import { MapPin, TrendingUp, ChevronRight } from "lucide-react";
+import { LgaPledgeData, WardPledgeData } from "@/data/kanoPledgeData";
 import {
   Drawer,
   DrawerContent,
@@ -12,6 +12,30 @@ interface MapBottomSheetProps {
   onOpenChange: (open: boolean) => void;
   data: LgaPledgeData | null;
 }
+
+const WardRow = ({ ward }: { ward: WardPledgeData }) => {
+  const progress = Math.min(100, (ward.pledges / ward.target) * 100);
+  return (
+    <div className="flex items-center gap-3 bg-muted/50 rounded-lg p-3">
+      <div className="flex-1 min-w-0">
+        <p className="font-heading font-semibold text-sm text-foreground truncate">{ward.ward}</p>
+        <div className="w-full bg-muted rounded-full h-1.5 mt-1">
+          <div
+            className="bg-gradient-primary h-1.5 rounded-full transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        <p className="font-heading font-bold text-sm text-foreground">{ward.pledges.toLocaleString()}</p>
+        <p className="text-[10px] text-primary font-semibold flex items-center gap-0.5 justify-end">
+          <TrendingUp size={9} />
+          {ward.growth}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const MapBottomSheet = ({ open, onOpenChange, data }: MapBottomSheetProps) => {
   if (!data) return null;
@@ -27,7 +51,7 @@ const MapBottomSheet = ({ open, onOpenChange, data }: MapBottomSheetProps) => {
             {data.lga}
           </DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 pb-6 space-y-4">
+        <div className="px-4 pb-6 space-y-4 max-h-[60vh] overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-muted rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Pledges</p>
@@ -56,6 +80,23 @@ const MapBottomSheet = ({ open, onOpenChange, data }: MapBottomSheetProps) => {
               Target: {data.target.toLocaleString()} pledges
             </p>
           </div>
+
+          {/* Ward breakdown */}
+          {data.wards && data.wards.length > 0 && (
+            <div>
+              <h4 className="font-heading font-bold text-sm text-foreground mb-2 flex items-center gap-1">
+                <ChevronRight size={14} className="text-primary" />
+                Wards in {data.lga} ({data.wards.length})
+              </h4>
+              <div className="space-y-2">
+                {data.wards
+                  .sort((a, b) => b.pledges - a.pledges)
+                  .map((ward) => (
+                    <WardRow key={ward.ward} ward={ward} />
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </DrawerContent>
     </Drawer>
