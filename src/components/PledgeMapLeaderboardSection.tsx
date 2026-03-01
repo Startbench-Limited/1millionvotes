@@ -5,25 +5,25 @@ import {
   Geographies,
   Geography,
 } from "react-simple-maps";
-import { statePledgeData, getColorScale, legendItems, StatePledgeData } from "@/data/nigeriaPledgeData";
+import { lgaPledgeData, getLgaColorScale, lgaLegendItems, LgaPledgeData } from "@/data/kanoPledgeData";
 import { MapPin, TrendingUp, Trophy, Medal, Award, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MapBottomSheet from "@/components/MapBottomSheet";
 
-const GEO_URL = "/nigeria-states.json";
+const GEO_URL = "/kano-lgas.json";
 
 const allLeaderboard = [
-  { rank: 1, state: "Lagos", ward: "Ikeja Central", pledges: 45892, growth: "+12.4%", icon: Trophy },
-  { rank: 2, state: "Kano", ward: "Nassarawa GRA", pledges: 38741, growth: "+9.8%", icon: Medal },
-  { rank: 3, state: "Rivers", ward: "Port Harcourt Central", pledges: 32156, growth: "+15.2%", icon: Award },
-  { rank: 4, state: "Oyo", ward: "Ibadan North", pledges: 28493, growth: "+7.6%", icon: TrendingUp },
-  { rank: 5, state: "Abuja FCT", ward: "Wuse II", pledges: 25187, growth: "+11.3%", icon: TrendingUp },
-  { rank: 6, state: "Kaduna", ward: "Kaduna North", pledges: 22341, growth: "+8.1%", icon: TrendingUp },
-  { rank: 7, state: "Katsina", ward: "Katsina Central", pledges: 24560, growth: "+9.2%", icon: TrendingUp },
-  { rank: 8, state: "Borno", ward: "Maiduguri Central", pledges: 22560, growth: "+10.1%", icon: TrendingUp },
-  { rank: 9, state: "Bauchi", ward: "Bauchi Central", pledges: 21340, growth: "+9.5%", icon: TrendingUp },
-  { rank: 10, state: "Sokoto", ward: "Sokoto South", pledges: 20340, growth: "+8.9%", icon: TrendingUp },
+  { rank: 1, lga: "Kano Municipal", ward: "Kano Municipal Central", pledges: 4589, growth: "+14.2%", icon: Trophy },
+  { rank: 2, lga: "Dala", ward: "Dala Central", pledges: 3589, growth: "+12.4%", icon: Medal },
+  { rank: 3, lga: "Gwale", ward: "Gwale Central", pledges: 3456, growth: "+11.8%", icon: Award },
+  { rank: 4, lga: "Nasarawa", ward: "Nasarawa Central", pledges: 3215, growth: "+10.5%", icon: TrendingUp },
+  { rank: 5, lga: "Fagge", ward: "Fagge Central", pledges: 3187, growth: "+11.3%", icon: TrendingUp },
+  { rank: 6, lga: "Kumbotso", ward: "Kumbotso Central", pledges: 2893, growth: "+9.8%", icon: TrendingUp },
+  { rank: 7, lga: "Ungogo", ward: "Ungogo Central", pledges: 2789, growth: "+9.6%", icon: TrendingUp },
+  { rank: 8, lga: "Tarauni", ward: "Tarauni Central", pledges: 2567, growth: "+9.2%", icon: TrendingUp },
+  { rank: 9, lga: "Dambatta", ward: "Dambatta Central", pledges: 2256, growth: "+10.1%", icon: TrendingUp },
+  { rank: 10, lga: "Bichi", ward: "Bichi Central", pledges: 2134, growth: "+9.5%", icon: TrendingUp },
 ];
 
 const rankColors = [
@@ -35,20 +35,20 @@ const rankColors = [
 const PledgeMapLeaderboardSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
-  const [hoveredState, setHoveredState] = useState<string | null>(null);
+  const [hoveredLga, setHoveredLga] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [searchQuery, setSearchQuery] = useState("");
-  const [bottomSheetData, setBottomSheetData] = useState<StatePledgeData | null>(null);
+  const [bottomSheetData, setBottomSheetData] = useState<LgaPledgeData | null>(null);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const hoveredData = useMemo(() => {
-    if (!hoveredState) return null;
-    return statePledgeData[hoveredState] ?? null;
-  }, [hoveredState]);
+    if (!hoveredLga) return null;
+    return lgaPledgeData[hoveredLga] ?? null;
+  }, [hoveredLga]);
 
   const totalPledges = useMemo(
-    () => Object.values(statePledgeData).reduce((sum, s) => sum + s.pledges, 0),
+    () => Object.values(lgaPledgeData).reduce((sum, s) => sum + s.pledges, 0),
     []
   );
 
@@ -57,14 +57,14 @@ const PledgeMapLeaderboardSection = () => {
     const q = searchQuery.toLowerCase();
     return allLeaderboard.filter(
       (entry) =>
-        entry.state.toLowerCase().includes(q) ||
+        entry.lga.toLowerCase().includes(q) ||
         entry.ward.toLowerCase().includes(q)
     );
   }, [searchQuery]);
 
-  const handleStateClick = useCallback((stateName: string) => {
+  const handleLgaClick = useCallback((lgaName: string) => {
     if (isMobile) {
-      const data = statePledgeData[stateName] ?? null;
+      const data = lgaPledgeData[lgaName] ?? null;
       if (data) {
         setBottomSheetData(data);
         setBottomSheetOpen(true);
@@ -86,21 +86,21 @@ const PledgeMapLeaderboardSection = () => {
               Pledge Distribution
             </p>
             <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
-              Pledges Across Nigeria
+              Pledges Across Kano
             </h2>
             <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
               {isMobile
-                ? "Tap any state to see detailed pledge statistics."
-                : "Hover over any state to see detailed statistics."}
+                ? "Tap any LGA to see detailed pledge statistics."
+                : "Hover over any LGA to see detailed statistics."}
             </p>
 
             <div
               className="relative"
-              onMouseLeave={() => !isMobile && setHoveredState(null)}
+              onMouseLeave={() => !isMobile && setHoveredLga(null)}
             >
               <ComposableMap
                 projection="geoMercator"
-                projectionConfig={{ scale: 2800, center: [8.5, 9.0] }}
+                projectionConfig={{ scale: 18000, center: [8.5, 11.75] }}
                 width={800}
                 height={700}
                 style={{ width: "100%", height: "auto" }}
@@ -108,19 +108,19 @@ const PledgeMapLeaderboardSection = () => {
                 <Geographies geography={GEO_URL}>
                   {({ geographies }) =>
                     geographies.map((geo) => {
-                      const stateName = geo.properties.NAME_1 || geo.properties.name || "";
-                      const data = statePledgeData[stateName];
+                      const lgaName = geo.properties.lga_name || geo.properties.NAME_2 || geo.properties.name || "";
+                      const data = lgaPledgeData[lgaName];
                       const pledges = data?.pledges ?? 0;
-                      const fillColor = getColorScale(pledges);
+                      const fillColor = getLgaColorScale(pledges);
 
                       return (
                         <Geography
                           key={geo.rsmKey}
                           geography={geo}
-                          onClick={() => handleStateClick(stateName)}
+                          onClick={() => handleLgaClick(lgaName)}
                           onMouseEnter={(e) => {
                             if (isMobile) return;
-                            setHoveredState(stateName);
+                            setHoveredLga(lgaName);
                             const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
                             if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
@@ -129,7 +129,7 @@ const PledgeMapLeaderboardSection = () => {
                             const rect = (e.target as SVGElement).closest("svg")?.getBoundingClientRect();
                             if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
-                          onMouseLeave={() => !isMobile && setHoveredState(null)}
+                          onMouseLeave={() => !isMobile && setHoveredLga(null)}
                           style={{
                             default: { fill: fillColor, stroke: "hsl(0, 0%, 100%)", strokeWidth: 0.8, outline: "none", transition: "fill 0.2s ease" },
                             hover: { fill: "hsl(120, 100%, 35%)", stroke: "hsl(0, 0%, 100%)", strokeWidth: 1.5, outline: "none", cursor: "pointer" },
@@ -150,7 +150,7 @@ const PledgeMapLeaderboardSection = () => {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin size={14} className="text-primary" />
-                    <span className="font-heading font-bold text-foreground text-sm">{hoveredData.state}</span>
+                    <span className="font-heading font-bold text-foreground text-sm">{hoveredData.lga}</span>
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
@@ -177,7 +177,7 @@ const PledgeMapLeaderboardSection = () => {
 
             {/* Legend */}
             <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
-              {legendItems.map((item) => (
+              {lgaLegendItems.map((item) => (
                 <div key={item.label} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full border border-border" style={{ backgroundColor: item.color }} />
                   <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">{item.label}</span>
@@ -186,7 +186,7 @@ const PledgeMapLeaderboardSection = () => {
             </div>
 
             <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground">
-              Total pledges across all states:{" "}
+              Total pledges across all LGAs:{" "}
               <span className="font-heading font-bold text-primary text-sm sm:text-base">{totalPledges.toLocaleString()}</span>
             </p>
           </motion.div>
@@ -201,16 +201,16 @@ const PledgeMapLeaderboardSection = () => {
               Top Supporters
             </p>
             <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
-              State Leaderboard
+              LGAs Leaderboard
             </h2>
             <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
-              See which states and wards are leading the charge for 1 million pledges.
+              See which LGAs and wards are leading the charge for pledges in Kano State.
             </p>
 
             <div className="relative mb-4">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search state or ward..."
+                placeholder="Search LGA or ward..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-11 text-sm"
@@ -220,12 +220,12 @@ const PledgeMapLeaderboardSection = () => {
             <div className="space-y-2 sm:space-y-3 max-h-[500px] overflow-y-auto pr-1">
               {filteredLeaderboard.length === 0 && (
                 <p className="text-center text-muted-foreground text-sm py-8">
-                  No states match your search.
+                  No LGAs match your search.
                 </p>
               )}
               {filteredLeaderboard.map((entry, index) => (
                 <motion.div
-                  key={entry.state}
+                  key={entry.lga}
                   initial={{ opacity: 0, x: 20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ delay: 0.3 + index * 0.08, duration: 0.5 }}
@@ -240,7 +240,7 @@ const PledgeMapLeaderboardSection = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-heading font-bold text-sm sm:text-base text-foreground truncate">{entry.state}</h3>
+                      <h3 className="font-heading font-bold text-sm sm:text-base text-foreground truncate">{entry.lga}</h3>
                       {entry.rank <= 3 && <entry.icon size={14} className="text-primary shrink-0" />}
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">{entry.ward}</p>
