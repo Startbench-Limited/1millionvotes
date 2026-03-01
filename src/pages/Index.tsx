@@ -4,7 +4,7 @@ import PledgeCounter from "@/components/PledgeCounter";
 import FeaturesSection from "@/components/FeaturesSection";
 import PledgeMapLeaderboardSection from "@/components/PledgeMapLeaderboardSection";
 import RegisterSection from "@/components/RegisterSection";
-import CampaignGallerySection from "@/components/CampaignGallerySection";
+
 import VolunteerSection from "@/components/VolunteerSection";
 import Footer from "@/components/Footer";
 
@@ -18,7 +18,7 @@ const Index = () => {
         <FeaturesSection />
         <PledgeMapLeaderboardSection />
         <RegisterSection />
-        <CampaignGallerySection />
+        
         <VolunteerSection />
       </main>
       <Footer />
