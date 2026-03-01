@@ -1,5 +1,5 @@
 import { MapPin, TrendingUp } from "lucide-react";
-import { StatePledgeData } from "@/data/nigeriaPledgeData";
+import { LgaPledgeData } from "@/data/kanoPledgeData";
 import {
   Drawer,
   DrawerContent,
@@ -10,7 +10,7 @@ import {
 interface MapBottomSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  data: StatePledgeData | null;
+  data: LgaPledgeData | null;
 }
 
 const MapBottomSheet = ({ open, onOpenChange, data }: MapBottomSheetProps) => {
@@ -24,7 +24,7 @@ const MapBottomSheet = ({ open, onOpenChange, data }: MapBottomSheetProps) => {
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2 font-heading">
             <MapPin size={18} className="text-primary" />
-            {data.state}
+            {data.lga}
           </DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-6 space-y-4">
