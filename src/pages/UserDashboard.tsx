@@ -131,6 +131,13 @@ const UserDashboard = () => {
             <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm">
               {profile.avatar_initials}
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => { await signOut(); navigate("/"); }}
+            >
+              <LogOut size={16} className="mr-1.5" /> <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
         </div>
       </header>
