@@ -25,7 +25,8 @@ import { useUserDashboard, type PledgeRecord } from "@/hooks/useUserDashboard";
 
 const UserDashboard = () => {
   const { toast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
   const {
     loading, profile, pledgeHistory, pledges, referrals, tasks,
     rewards, redemptions, notifPrefs,
