@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Award, Bell, Calendar, CheckCircle, Copy, Gift, MapPin,
+  ArrowLeft, Award, Bell, Calendar, CheckCircle, Copy, Gift, LogOut, MapPin,
   Share2, ShoppingBag, Star, User, Users, Zap, Loader2,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +25,8 @@ import { useUserDashboard, type PledgeRecord } from "@/hooks/useUserDashboard";
 
 const UserDashboard = () => {
   const { toast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
   const {
     loading, profile, pledgeHistory, pledges, referrals, tasks,
     rewards, redemptions, notifPrefs,
@@ -129,6 +131,13 @@ const UserDashboard = () => {
             <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm">
               {profile.avatar_initials}
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => { await signOut(); navigate("/"); }}
+            >
+              <LogOut size={16} className="mr-1.5" /> <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -435,8 +444,18 @@ const UserDashboard = () => {
                   <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="mt-1.5" /></div>
                   <div><Label>LGA</Label><Input value={form.lga} onChange={(e) => setForm({ ...form, lga: e.target.value })} className="mt-1.5" /></div>
                   <div><Label>Ward</Label><Input value={form.ward} onChange={(e) => setForm({ ...form, ward: e.target.value })} className="mt-1.5" /></div>
+                  <div><Label>Polling Unit</Label><Input value={form.polling_unit} onChange={(e) => setForm({ ...form, polling_unit: e.target.value })} className="mt-1.5" /></div>
                 </div>
-                <Button onClick={handleSave} className="mt-6 font-heading font-semibold">Save Changes</Button>
+                <div className="flex flex-wrap items-center gap-3 mt-6">
+                  <Button onClick={handleSave} className="font-heading font-semibold">Save Changes</Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => { await signOut(); navigate("/"); }}
+                    className="font-heading font-semibold"
+                  >
+                    <LogOut size={16} className="mr-1.5" /> Sign Out
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
