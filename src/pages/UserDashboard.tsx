@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Award, Bell, Calendar, CheckCircle, Copy, Gift, MapPin,
+  ArrowLeft, Award, Bell, Calendar, CheckCircle, Copy, Gift, LogOut, MapPin,
   Share2, ShoppingBag, Star, User, Users, Zap, Loader2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
