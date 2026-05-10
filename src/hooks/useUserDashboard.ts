@@ -41,33 +41,64 @@ export interface VolunteerTaskItem {
   tokens: number;
 }
 
+export interface PledgeRecord {
+  id: string;
+  full_name: string;
+  phone: string;
+  state: string;
+  lga: string;
+  ward: string;
+  polling_unit: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RewardItem {
+  id: string;
+  name: string;
+  description: string | null;
+  token_cost: number;
+  stock: number | null;
+  image_url: string | null;
+}
+
+export interface RedemptionItem {
+  id: string;
+  reward_name: string;
+  tokens_spent: number;
+  status: string;
+  created_at: string;
+}
+
+export interface NotificationPrefs {
+  campaign_updates: boolean;
+  pledge_progress: boolean;
+}
+
 const initials = (name: string) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0]?.toUpperCase())
-    .slice(0, 2)
-    .join("") || "U";
+  name.split(" ").filter(Boolean).map((n) => n[0]?.toUpperCase()).slice(0, 2).join("") || "U";
 
-const mapTaskStatus = (s: string): VolunteerTaskItem["status"] => {
-  if (s === "completed") return "completed";
-  if (s === "in_progress" || s === "active") return "in_progress";
-  return "upcoming";
-};
+const mapTaskStatus = (s: string): VolunteerTaskItem["status"] =>
+  s === "completed" ? "completed" : s === "in_progress" || s === "active" ? "in_progress" : "upcoming";
 
-const mapPledgeStatus = (s: string): UserProfile["pledge_status"] => {
-  if (s === "verified") return "verified";
-  if (s === "rejected") return "rejected";
-  return "pending";
-};
+const mapPledgeStatus = (s: string): UserProfile["pledge_status"] =>
+  s === "verified" ? "verified" : s === "rejected" ? "rejected" : "pending";
 
 export const useUserDashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [pledgeHistory, setPledgeHistory] = useState<PledgeHistoryItem[]>([]);
+  const [pledges, setPledges] = useState<PledgeRecord[]>([]);
   const [referrals, setReferrals] = useState<ReferralItem[]>([]);
   const [tasks, setTasks] = useState<VolunteerTaskItem[]>([]);
+  const [rewards, setRewards] = useState<RewardItem[]>([]);
+  const [redemptions, setRedemptions] = useState<RedemptionItem[]>([]);
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>({
+    campaign_updates: true,
+    pledge_progress: true,
+  });
 
   const fetchAll = useCallback(async () => {
     if (!user) {
@@ -76,22 +107,29 @@ export const useUserDashboard = () => {
     }
     setLoading(true);
 
-    const [{ data: profileRow }, { data: pledgesRows }, { data: refRows }, { data: taskRows }] =
-      await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("pledges").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("referrals").select("*").eq("referrer_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("volunteers").select("*").eq("user_id", user.id).order("deadline", { ascending: true }),
-      ]);
+    const [
+      { data: profileRow },
+      { data: pledgesRows },
+      { data: refRows },
+      { data: taskRows },
+      { data: rewardsRows },
+      { data: redemptionRows },
+      { data: prefsRow },
+    ] = await Promise.all([
+      supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase.from("pledges").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("referrals").select("*").eq("referrer_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("volunteers").select("*").eq("user_id", user.id).order("deadline", { ascending: true }),
+      supabase.from("rewards").select("*").eq("is_active", true).order("token_cost", { ascending: true }),
+      supabase.from("redemptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("notification_preferences").select("*").eq("user_id", user.id).maybeSingle(),
+    ]);
 
-    // Hydrate referrals with referred user profile (name + state)
     let referralItems: ReferralItem[] = [];
     if (refRows && refRows.length > 0) {
       const ids = refRows.map((r) => r.referred_id);
       const { data: refProfiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, state")
-        .in("user_id", ids);
+        .from("profiles").select("user_id, full_name, state").in("user_id", ids);
       const map = new Map((refProfiles ?? []).map((p) => [p.user_id, p]));
       referralItems = refRows.map((r) => {
         const p = map.get(r.referred_id);
@@ -105,7 +143,6 @@ export const useUserDashboard = () => {
       });
     }
 
-    // Build pledge history from pledge events + tasks + referrals
     const history: PledgeHistoryItem[] = [];
     for (const p of pledgesRows ?? []) {
       history.push({
@@ -133,6 +170,14 @@ export const useUserDashboard = () => {
         });
       }
     }
+    for (const r of redemptionRows ?? []) {
+      history.push({
+        id: `redeem-${r.id}`,
+        action: `Redeemed ${r.reward_name}`,
+        date: r.created_at,
+        tokens: -(r.tokens_spent ?? 0),
+      });
+    }
     history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const latestPledge = pledgesRows?.[0];
@@ -158,6 +203,7 @@ export const useUserDashboard = () => {
         : null
     );
     setPledgeHistory(history);
+    setPledges((pledgesRows ?? []) as PledgeRecord[]);
     setReferrals(referralItems);
     setTasks(
       (taskRows ?? []).map((t) => ({
@@ -168,12 +214,18 @@ export const useUserDashboard = () => {
         tokens: t.tokens_reward ?? 0,
       }))
     );
+    setRewards((rewardsRows ?? []) as RewardItem[]);
+    setRedemptions((redemptionRows ?? []) as RedemptionItem[]);
+    if (prefsRow) {
+      setNotifPrefs({
+        campaign_updates: prefsRow.campaign_updates,
+        pledge_progress: prefsRow.pledge_progress,
+      });
+    }
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user || !profile) return { error: new Error("Not authenticated") };
@@ -192,5 +244,24 @@ export const useUserDashboard = () => {
     return { error };
   };
 
-  return { loading, profile, pledgeHistory, referrals, tasks, refresh: fetchAll, updateProfile };
+  const redeemReward = async (rewardId: string) => {
+    const { error } = await supabase.rpc("redeem_reward", { _reward_id: rewardId });
+    if (!error) await fetchAll();
+    return { error };
+  };
+
+  const updateNotifPrefs = async (next: NotificationPrefs) => {
+    if (!user) return { error: new Error("Not authenticated") };
+    const { error } = await supabase
+      .from("notification_preferences")
+      .upsert({ user_id: user.id, ...next }, { onConflict: "user_id" });
+    if (!error) setNotifPrefs(next);
+    return { error };
+  };
+
+  return {
+    loading, profile, pledgeHistory, pledges, referrals, tasks,
+    rewards, redemptions, notifPrefs,
+    refresh: fetchAll, updateProfile, redeemReward, updateNotifPrefs,
+  };
 };

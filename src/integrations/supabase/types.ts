@@ -50,6 +50,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          campaign_updates: boolean
+          created_at: string
+          id: string
+          pledge_progress: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_updates?: boolean
+          created_at?: string
+          id?: string
+          pledge_progress?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_updates?: boolean
+          created_at?: string
+          id?: string
+          pledge_progress?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pledges: {
         Row: {
           created_at: string
@@ -143,6 +170,47 @@ export type Database = {
         }
         Relationships: []
       }
+      redemptions: {
+        Row: {
+          created_at: string
+          id: string
+          reward_id: string
+          reward_name: string
+          status: string
+          tokens_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reward_id: string
+          reward_name: string
+          status?: string
+          tokens_spent: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reward_id?: string
+          reward_name?: string
+          status?: string
+          tokens_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           created_at: string
@@ -167,6 +235,42 @@ export type Database = {
           referrer_id?: string
           status?: string
           tokens_awarded?: number
+        }
+        Relationships: []
+      }
+      rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          stock: number | null
+          token_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          stock?: number | null
+          token_cost: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          stock?: number | null
+          token_cost?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -245,6 +349,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      redeem_reward: { Args: { _reward_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

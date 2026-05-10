@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Award, Calendar, CheckCircle, Copy, Gift,
-  Share2, Star, User, Users, Zap, Loader2
+  ArrowLeft, Award, Bell, Calendar, CheckCircle, Copy, Gift, MapPin,
+  Share2, ShoppingBag, Star, User, Users, Zap, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,20 +12,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import campaignLogo from "@/assets/campaign-logo.png";
 import { mockRewardTiers } from "@/data/mockDashboardData";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserDashboard } from "@/hooks/useUserDashboard";
+import { useUserDashboard, type PledgeRecord } from "@/hooks/useUserDashboard";
 
 const UserDashboard = () => {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
-  const { loading, profile, pledgeHistory, referrals, tasks, updateProfile } = useUserDashboard();
+  const {
+    loading, profile, pledgeHistory, pledges, referrals, tasks,
+    rewards, redemptions, notifPrefs,
+    updateProfile, redeemReward, updateNotifPrefs,
+  } = useUserDashboard();
 
   const [form, setForm] = useState({
     full_name: "", phone: "", state: "", lga: "", ward: "", polling_unit: "",
   });
+  const [selectedPledge, setSelectedPledge] = useState<PledgeRecord | null>(null);
+  const [redeemingId, setRedeemingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -63,7 +73,7 @@ const UserDashboard = () => {
   };
 
   const statusColor = (s: string) => {
-    if (s === "verified") return "bg-primary/10 text-primary border-primary/20";
+    if (s === "verified" || s === "fulfilled") return "bg-primary/10 text-primary border-primary/20";
     if (s === "pending") return "bg-alert/10 text-alert-foreground border-alert/20";
     return "bg-destructive/10 text-destructive border-destructive/20";
   };
@@ -80,14 +90,35 @@ const UserDashboard = () => {
     else toast({ title: "Profile updated" });
   };
 
+  const handleRedeem = async (rewardId: string, cost: number, name: string) => {
+    if (tokens < cost) {
+      toast({ title: "Not enough tokens", description: `You need ${cost - tokens} more tokens.`, variant: "destructive" });
+      return;
+    }
+    setRedeemingId(rewardId);
+    const { error } = await redeemReward(rewardId);
+    setRedeemingId(null);
+    if (error) toast({ title: "Redemption failed", description: error.message, variant: "destructive" });
+    else toast({ title: "Reward redeemed!", description: `${name} is on its way.` });
+  };
+
+  const handleNotifToggle = async (key: "campaign_updates" | "pledge_progress", val: boolean) => {
+    const next = { ...notifPrefs, [key]: val };
+    const { error } = await updateNotifPrefs(next);
+    if (error) toast({ title: "Could not save preference", description: error.message, variant: "destructive" });
+  };
+
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  const fmtDateTime = (d: string) =>
+    new Date(d).toLocaleString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm"><ArrowLeft size={18} className="mr-1" /> Home</Button>
-            </Link>
+            <Link to="/"><Button variant="ghost" size="sm"><ArrowLeft size={18} className="mr-1" /> Home</Button></Link>
             <img src={campaignLogo} alt="Campaign" className="h-10 w-auto hidden sm:block" />
           </div>
           <div className="flex items-center gap-3">
@@ -122,9 +153,7 @@ const UserDashboard = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <stat.icon size={20} className="text-primary" />
-                    {stat.highlight && (
-                      <Badge className={statusColor(profile.pledge_status)}>{profile.pledge_status}</Badge>
-                    )}
+                    {stat.highlight && (<Badge className={statusColor(profile.pledge_status)}>{profile.pledge_status}</Badge>)}
                   </div>
                   <p className="font-heading font-bold text-2xl text-foreground">{stat.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
@@ -162,10 +191,12 @@ const UserDashboard = () => {
         </Card>
 
         <Tabs defaultValue="history" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto">
             <TabsTrigger value="history" className="text-xs sm:text-sm py-2">History</TabsTrigger>
+            <TabsTrigger value="pledges" className="text-xs sm:text-sm py-2">Pledges</TabsTrigger>
+            <TabsTrigger value="rewards" className="text-xs sm:text-sm py-2">Rewards</TabsTrigger>
             <TabsTrigger value="referrals" className="text-xs sm:text-sm py-2">Referrals</TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs sm:text-sm py-2">Tasks</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2">Alerts</TabsTrigger>
             <TabsTrigger value="profile" className="text-xs sm:text-sm py-2">Profile</TabsTrigger>
           </TabsList>
 
@@ -173,27 +204,142 @@ const UserDashboard = () => {
             <Card className="shadow-card">
               <CardHeader>
                 <CardTitle className="text-lg">Activity & Token History</CardTitle>
-                <CardDescription>Your pledge journey and earned rewards</CardDescription>
+                <CardDescription>Your pledge journey, redemptions, and earned rewards</CardDescription>
               </CardHeader>
               <CardContent>
                 {pledgeHistory.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-6 text-center">No activity yet. Register a pledge to get started.</p>
                 ) : (
                   <div className="space-y-4">
-                    {pledgeHistory.map((item, i) => (
-                      <motion.div key={item.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    {pledgeHistory.map((item, i) => {
+                      const negative = item.tokens < 0;
+                      return (
+                        <motion.div key={item.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Gift size={14} className="text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{item.action}</p>
+                              <p className="text-xs text-muted-foreground">{fmtDate(item.date)}</p>
+                            </div>
+                          </div>
+                          <span className={`text-sm font-heading font-bold ${negative ? "text-destructive" : "text-primary"}`}>
+                            {negative ? "" : "+"}{item.tokens}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pledges">
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Your Pledges ({pledges.length})</CardTitle>
+                <CardDescription>Tap any pledge to view full details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pledges.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">No pledges yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {pledges.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPledge(p)}
+                        className="w-full text-left flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary/40 hover:bg-muted/50 transition-colors"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Gift size={14} className="text-primary" />
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                            <MapPin size={16} className="text-primary" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">{item.action}</p>
-                            <p className="text-xs text-muted-foreground">{new Date(item.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
+                            <p className="text-sm font-medium text-foreground">{p.lga}, {p.state}</p>
+                            <p className="text-xs text-muted-foreground">{fmtDate(p.created_at)} • Ward {p.ward}</p>
                           </div>
                         </div>
-                        <span className="text-sm font-heading font-bold text-primary">+{item.tokens}</span>
-                      </motion.div>
+                        <Badge className={statusColor(p.status)}>{p.status}</Badge>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="rewards">
+            <Card className="shadow-card mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ShoppingBag size={18} className="text-primary" /> Available Rewards
+                </CardTitle>
+                <CardDescription>Spend your tokens on campaign rewards</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {rewards.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">No rewards available right now.</p>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {rewards.map(r => {
+                      const canAfford = tokens >= r.token_cost;
+                      const outOfStock = r.stock !== null && r.stock <= 0;
+                      return (
+                        <div key={r.id} className="flex flex-col p-4 rounded-lg border border-border">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div>
+                              <p className="font-heading font-semibold text-foreground">{r.name}</p>
+                              {r.description && <p className="text-xs text-muted-foreground mt-0.5">{r.description}</p>}
+                            </div>
+                            <Badge variant="secondary" className="shrink-0">
+                              <Zap size={10} className="mr-1" />{r.token_cost}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between mt-auto pt-3">
+                            <span className="text-xs text-muted-foreground">
+                              {r.stock !== null ? `${r.stock} left` : "Unlimited"}
+                            </span>
+                            <Button
+                              size="sm"
+                              disabled={!canAfford || outOfStock || redeemingId === r.id}
+                              onClick={() => handleRedeem(r.id, r.token_cost, r.name)}
+                            >
+                              {redeemingId === r.id ? <Loader2 size={14} className="animate-spin" /> :
+                                outOfStock ? "Sold out" : canAfford ? "Redeem" : "Not enough"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Redemption History ({redemptions.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {redemptions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">No redemptions yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {redemptions.map(r => (
+                      <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{r.reward_name}</p>
+                          <p className="text-xs text-muted-foreground">{fmtDateTime(r.created_at)}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-heading font-bold text-destructive">-{r.tokens_spent}</span>
+                          <Badge className={statusColor(r.status)}>{r.status}</Badge>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -216,9 +362,7 @@ const UserDashboard = () => {
               </CardContent>
             </Card>
             <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Your Referrals ({referrals.length})</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-lg">Your Referrals ({referrals.length})</CardTitle></CardHeader>
               <CardContent>
                 {referrals.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-6 text-center">No referrals yet. Share your link to earn tokens.</p>
@@ -232,7 +376,7 @@ const UserDashboard = () => {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{ref.name}</p>
-                            <p className="text-xs text-muted-foreground">{ref.state} • {new Date(ref.date).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}</p>
+                            <p className="text-xs text-muted-foreground">{ref.state} • {fmtDate(ref.date)}</p>
                           </div>
                         </div>
                         <Badge className={statusColor(ref.status)}>{ref.status}</Badge>
@@ -244,35 +388,35 @@ const UserDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="tasks">
+          <TabsContent value="notifications">
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle className="text-lg">Volunteer Tasks</CardTitle>
-                <CardDescription>Complete tasks to earn reward tokens</CardDescription>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Bell size={18} className="text-primary" /> Notification Settings
+                </CardTitle>
+                <CardDescription>Choose which alerts you want to receive</CardDescription>
               </CardHeader>
-              <CardContent>
-                {tasks.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-6 text-center">No tasks assigned yet.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {tasks.map(task => (
-                      <div key={task.id} className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                        <div className="flex-1 mr-4">
-                          <p className="text-sm font-medium text-foreground">{task.title}</p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Calendar size={12} /> Due {new Date(task.dueDate).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
-                            </span>
-                            <span className="text-xs font-heading font-semibold text-primary flex items-center gap-1">
-                              <Zap size={12} /> {task.tokens} tokens
-                            </span>
-                          </div>
-                        </div>
-                        {taskStatusBadge(task.status)}
-                      </div>
-                    ))}
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                  <div>
+                    <p className="font-medium text-foreground">Campaign updates</p>
+                    <p className="text-xs text-muted-foreground">News, announcements, and rallies from the campaign team</p>
                   </div>
-                )}
+                  <Switch
+                    checked={notifPrefs.campaign_updates}
+                    onCheckedChange={(v) => handleNotifToggle("campaign_updates", v)}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                  <div>
+                    <p className="font-medium text-foreground">Pledge progress alerts</p>
+                    <p className="text-xs text-muted-foreground">Updates as we move toward the 1 million pledge goal</p>
+                  </div>
+                  <Switch
+                    checked={notifPrefs.pledge_progress}
+                    onCheckedChange={(v) => handleNotifToggle("pledge_progress", v)}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -298,6 +442,43 @@ const UserDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <Dialog open={!!selectedPledge} onOpenChange={(o) => !o && setSelectedPledge(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin size={18} className="text-primary" /> Pledge Details
+            </DialogTitle>
+            <DialogDescription>Full record of this pledge submission</DialogDescription>
+          </DialogHeader>
+          {selectedPledge && (
+            <div className="space-y-3 mt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Status</span>
+                <Badge className={statusColor(selectedPledge.status)}>{selectedPledge.status}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Tokens earned</span>
+                <span className="text-sm font-heading font-bold text-primary">
+                  +{selectedPledge.status === "verified" ? 70 : 50}
+                </span>
+              </div>
+              <div className="border-t border-border pt-3 grid grid-cols-2 gap-3 text-sm">
+                <div><p className="text-xs text-muted-foreground">Full name</p><p className="font-medium">{selectedPledge.full_name}</p></div>
+                <div><p className="text-xs text-muted-foreground">Phone</p><p className="font-medium">{selectedPledge.phone}</p></div>
+                <div><p className="text-xs text-muted-foreground">State</p><p className="font-medium">{selectedPledge.state}</p></div>
+                <div><p className="text-xs text-muted-foreground">LGA</p><p className="font-medium">{selectedPledge.lga}</p></div>
+                <div><p className="text-xs text-muted-foreground">Ward</p><p className="font-medium">{selectedPledge.ward}</p></div>
+                <div><p className="text-xs text-muted-foreground">Polling unit</p><p className="font-medium">{selectedPledge.polling_unit}</p></div>
+              </div>
+              <div className="border-t border-border pt-3 text-sm">
+                <p className="text-xs text-muted-foreground">Submitted</p>
+                <p className="font-medium">{fmtDateTime(selectedPledge.created_at)}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
