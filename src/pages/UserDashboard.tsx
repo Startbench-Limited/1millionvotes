@@ -15,6 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +25,7 @@ import campaignLogo from "@/assets/campaign-logo.png";
 import { mockRewardTiers } from "@/data/mockDashboardData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDashboard, type PledgeRecord } from "@/hooks/useUserDashboard";
+import { lgaWardNames } from "@/data/kanoPledgeData";
 
 const UserDashboard = () => {
   const { toast } = useToast();
@@ -441,9 +445,40 @@ const UserDashboard = () => {
                   <div><Label>Full Name</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="mt-1.5" /></div>
                   <div><Label>Email</Label><Input value={profile.email} disabled className="mt-1.5" /></div>
                   <div><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1.5" /></div>
-                  <div><Label>State</Label><Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="mt-1.5" /></div>
-                  <div><Label>LGA</Label><Input value={form.lga} onChange={(e) => setForm({ ...form, lga: e.target.value })} className="mt-1.5" /></div>
-                  <div><Label>Ward</Label><Input value={form.ward} onChange={(e) => setForm({ ...form, ward: e.target.value })} className="mt-1.5" /></div>
+                  <div><Label>State</Label><Input value="Kano" disabled className="mt-1.5" /></div>
+                  <div>
+                    <Label>LGA</Label>
+                    <Select
+                      value={form.lga}
+                      onValueChange={(v) => setForm({ ...form, lga: v, ward: "" })}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select LGA" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(lgaWardNames).sort().map((lga) => (
+                          <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Ward</Label>
+                    <Select
+                      value={form.ward}
+                      onValueChange={(v) => setForm({ ...form, ward: v })}
+                      disabled={!form.lga}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder={form.lga ? "Select Ward" : "Choose LGA first"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(lgaWardNames[form.lga] ?? []).map((ward) => (
+                          <SelectItem key={ward} value={ward}>{ward}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div><Label>Polling Unit</Label><Input value={form.polling_unit} onChange={(e) => setForm({ ...form, polling_unit: e.target.value })} className="mt-1.5" /></div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-6">

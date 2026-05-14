@@ -30,7 +30,7 @@ const generateWards = (lgaName: string, totalPledges: number, wardNames: string[
 };
 
 // Real Kano State council wards per INEC / Soluap (Oct 2024)
-const lgaWardNames: Record<string, string[]> = {
+export const lgaWardNames: Record<string, string[]> = {
   "Ajingi": ["Ajingi", "Balare", "Chula", "Dabin Kanawa", "Dundun", "Gafasa", "Gurduba", "Kunkurawa", "Toranke", "Ungawar Bai"],
   "Albasu": ["Albasu Central", "Bataiya", "Chamarana", "Daho", "Fanda", "Faragai", "Gagarame", "Hungu", "Saya-Saya", "Tsangaya"],
   "Bagwai": ["Bagwai", "Dangada", "Gadanya", "Gogori", "Kiyawa", "Kwajali", "Rimin Dako", "Romo", "Sare-Sare", "Wuro Bagga"],
