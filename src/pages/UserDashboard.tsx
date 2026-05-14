@@ -15,6 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +25,7 @@ import campaignLogo from "@/assets/campaign-logo.png";
 import { mockRewardTiers } from "@/data/mockDashboardData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDashboard, type PledgeRecord } from "@/hooks/useUserDashboard";
+import { lgaWardNames } from "@/data/kanoPledgeData";
 
 const UserDashboard = () => {
   const { toast } = useToast();
