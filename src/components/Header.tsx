@@ -88,16 +88,28 @@ const Header = () => {
                 {item.label}
               </a>
             ))}
-            <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" className="w-full mt-2 font-heading font-semibold">
-                My Dashboard
-              </Button>
-            </Link>
-            <Link to="/admin" onClick={() => setMobileOpen(false)}>
-              <Button variant="default" className="w-full mt-2 font-heading font-semibold shadow-primary">
-                Admin
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button variant="outline" className="w-full mt-2 font-heading font-semibold">
+                    My Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  variant="default"
+                  className="w-full mt-2 font-heading font-semibold shadow-primary"
+                  onClick={() => { setMobileOpen(false); signOut(); }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                <Button variant="default" className="w-full mt-2 font-heading font-semibold shadow-primary">
+                  Sign In / Register
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       )}
