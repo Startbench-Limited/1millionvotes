@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, BarChart3, CheckCircle, Clock, Edit, Eye, FileText,
   Image, MoreHorizontal, Search, Settings, Shield, TrendingUp,
-  Users, UserCheck, Zap, Trash2, Globe
+  Users, UserCheck, Zap, Trash2, Globe, LogOut, RefreshCw, Lock
 } from "lucide-react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
