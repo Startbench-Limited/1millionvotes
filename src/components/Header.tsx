@@ -15,6 +15,7 @@ const navItems = [
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -43,16 +44,24 @@ const Header = () => {
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/dashboard">
-            <Button variant="outline" size="sm" className="font-heading font-semibold">
-              My Dashboard
-            </Button>
-          </Link>
-          <Link to="/admin">
-            <Button variant="default" size="sm" className="font-heading font-semibold shadow-primary">
-              Admin
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm" className="font-heading font-semibold">
+                  My Dashboard
+                </Button>
+              </Link>
+              <Button variant="default" size="sm" className="font-heading font-semibold shadow-primary" onClick={() => signOut()}>
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Link to="/auth">
+              <Button variant="default" size="sm" className="font-heading font-semibold shadow-primary">
+                Sign In / Register
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile toggle */}
