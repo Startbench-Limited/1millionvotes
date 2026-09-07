@@ -136,6 +136,9 @@ const Auth = () => {
                   <Button type="submit" className="w-full font-heading font-bold" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  <Button type="button" variant="link" className="w-full text-sm" onClick={() => setMode("forgot")}>
+                    Forgot your password?
+                  </Button>
                 </form>
               </TabsContent>
 
@@ -168,6 +171,7 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+            )}
           </CardContent>
         </Card>
       </motion.div>
