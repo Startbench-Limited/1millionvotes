@@ -38,6 +38,10 @@ const chartConfig = {
 };
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const { isAdmin, checking, signedIn } = useIsAdmin();
+  const { signOut, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [contentDialogOpen, setContentDialogOpen] = useState(false);
   const [editingContent, setEditingContent] = useState<ContentFormData | null>(null);
