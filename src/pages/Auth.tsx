@@ -13,8 +13,24 @@ import campaignLogo from "@/assets/campaign-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"auth" | "forgot">("auth");
+  const [sent, setSent] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const email = new FormData(e.currentTarget).get("email") as string;
+    const { error } = await resetPassword(email);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setSent(true);
+      toast.success("Reset link sent — check your email.");
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
