@@ -13,8 +13,24 @@ import campaignLogo from "@/assets/campaign-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"auth" | "forgot">("auth");
+  const [sent, setSent] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const email = new FormData(e.currentTarget).get("email") as string;
+    const { error } = await resetPassword(email);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setSent(true);
+      toast.success("Reset link sent — check your email.");
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,6 +83,34 @@ const Auth = () => {
             <CardDescription>Sign in or create an account to pledge</CardDescription>
           </CardHeader>
           <CardContent>
+            {mode === "forgot" ? (
+              sent ? (
+                <div className="space-y-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    We sent a password reset link to your email. Open it to choose a new password.
+                  </p>
+                  <Button variant="outline" className="w-full" onClick={() => { setMode("auth"); setSent(false); }}>
+                    Back to Sign In
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgot} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <div className="relative">
+                      <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input name="email" id="forgot-email" type="email" placeholder="you@example.com" className="pl-9" required />
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full font-heading font-bold" disabled={loading}>
+                    {loading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <Button type="button" variant="ghost" className="w-full" onClick={() => setMode("auth")}>
+                    Back to Sign In
+                  </Button>
+                </form>
+              )
+            ) : (
             <Tabs defaultValue="signin">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -91,6 +135,9 @@ const Auth = () => {
                   </div>
                   <Button type="submit" className="w-full font-heading font-bold" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
+                  </Button>
+                  <Button type="button" variant="link" className="w-full text-sm" onClick={() => setMode("forgot")}>
+                    Forgot your password?
                   </Button>
                 </form>
               </TabsContent>
@@ -124,6 +171,7 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+            )}
           </CardContent>
         </Card>
       </motion.div>
