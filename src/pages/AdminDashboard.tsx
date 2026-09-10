@@ -192,11 +192,12 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
             <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2">Analytics</TabsTrigger>
             <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Users</TabsTrigger>
             <TabsTrigger value="volunteers" className="text-xs sm:text-sm py-2">Volunteers</TabsTrigger>
             <TabsTrigger value="content" className="text-xs sm:text-sm py-2">Content</TabsTrigger>
+            <TabsTrigger value="campaign" className="text-xs sm:text-sm py-2">Campaign</TabsTrigger>
           </TabsList>
 
           {/* Analytics */}
@@ -418,6 +419,12 @@ const AdminDashboard = () => {
               initialData={editingContent}
               isPending={createContent.isPending || updateContent.isPending}
             />
+          </TabsContent>
+          {/* Campaign */}
+          <TabsContent value="campaign">
+            <div className="max-w-2xl">
+              <CampaignSettingsCard />
+            </div>
           </TabsContent>
         </Tabs>
       </main>
