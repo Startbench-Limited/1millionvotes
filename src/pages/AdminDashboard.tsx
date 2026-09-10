@@ -32,6 +32,7 @@ import {
   useCreateContent, useUpdateContent, useDeleteContent, useToggleContentStatus
 } from "@/hooks/useContentMutations";
 import { ContentFormDialog, type ContentFormData } from "@/components/admin/ContentFormDialog";
+import CampaignSettingsCard from "@/components/admin/CampaignSettingsCard";
 
 const chartConfig = {
   pledges: { label: "Pledges", color: "hsl(120, 100%, 25%)" },
@@ -78,6 +79,54 @@ const AdminDashboard = () => {
 
   const s = stats ?? { totalPledges: 0, verifiedPledges: 0, todayPledges: 0, weekGrowth: 0, activeVolunteers: 0, totalVolunteers: 0 };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const handleRefresh = () => {
+    qc.invalidateQueries();
+  };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <RefreshCw size={22} className="mx-auto animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Checking your access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <Card className="shadow-card max-w-md w-full">
+          <CardContent className="p-8 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+              <Lock size={20} className="text-destructive" />
+            </div>
+            <div>
+              <h1 className="font-heading font-bold text-xl text-foreground">Admins only</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {signedIn
+                  ? "This account does not have admin access."
+                  : "Please sign in with an admin account to continue."}
+              </p>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => navigate(signedIn ? "/dashboard" : "/auth")} className="font-heading font-semibold">
+                {signedIn ? "Go to My Dashboard" : "Sign In"}
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/")}>Home</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -90,9 +139,17 @@ const AdminDashboard = () => {
             <img src={campaignLogo} alt="Campaign" className="h-10 w-auto hidden sm:block" />
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-heading">
+            <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-heading hidden sm:inline-flex">
               <Shield size={12} className="mr-1" /> Admin
             </Badge>
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              <RefreshCw size={15} className="sm:mr-1" />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut size={15} className="sm:mr-1" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -135,11 +192,12 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
             <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2">Analytics</TabsTrigger>
             <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Users</TabsTrigger>
             <TabsTrigger value="volunteers" className="text-xs sm:text-sm py-2">Volunteers</TabsTrigger>
             <TabsTrigger value="content" className="text-xs sm:text-sm py-2">Content</TabsTrigger>
+            <TabsTrigger value="campaign" className="text-xs sm:text-sm py-2">Campaign</TabsTrigger>
           </TabsList>
 
           {/* Analytics */}
@@ -361,6 +419,12 @@ const AdminDashboard = () => {
               initialData={editingContent}
               isPending={createContent.isPending || updateContent.isPending}
             />
+          </TabsContent>
+          {/* Campaign */}
+          <TabsContent value="campaign">
+            <div className="max-w-2xl">
+              <CampaignSettingsCard />
+            </div>
           </TabsContent>
         </Tabs>
       </main>

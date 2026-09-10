@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MapBottomSheet from "@/components/MapBottomSheet";
+import CampaignPeriodBadge from "@/components/CampaignPeriodBadge";
 
 const GEO_URL = "/kano-lgas.json";
 
@@ -167,9 +168,11 @@ const PledgeMapLeaderboardSection = () => {
             <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
               Pledges Across Kano
             </h2>
-            <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
+            <p className="text-muted-foreground max-w-md mb-3 text-xs sm:text-sm">
               Click any LGA to see ward-level pledge breakdown.
             </p>
+            <CampaignPeriodBadge className="mb-4 sm:mb-6" />
+
 
             <div
               className="relative"
@@ -296,9 +299,11 @@ const PledgeMapLeaderboardSection = () => {
                   <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
                     LGAs Leaderboard
                   </h2>
-                  <p className="text-muted-foreground max-w-md mb-4 sm:mb-6 text-xs sm:text-sm">
+                  <p className="text-muted-foreground max-w-md mb-3 text-xs sm:text-sm">
                     See which LGAs and wards are leading the charge. Click an LGA on the map for ward details.
                   </p>
+                  <CampaignPeriodBadge className="mb-4 sm:mb-6" />
+
 
                   <div className="relative mb-4">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
