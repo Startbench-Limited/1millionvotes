@@ -4,7 +4,7 @@ import { useCampaignSettings, formatCampaignDate, campaignDaysLeft } from "@/hoo
 const CampaignPeriodBadge = ({ className = "" }: { className?: string }) => {
   const { data } = useCampaignSettings();
 
-  if (!data || (!data.start_date && !data.end_date)) return null;
+  if (!data || !data.is_active || (!data.start_date && !data.end_date)) return null;
 
   const daysLeft = campaignDaysLeft(data.end_date);
 
