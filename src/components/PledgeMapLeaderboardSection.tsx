@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MapBottomSheet from "@/components/MapBottomSheet";
 import CampaignPeriodBadge from "@/components/CampaignPeriodBadge";
+import CampaignRulesPanel from "@/components/CampaignRulesPanel";
 
 const GEO_URL = "/kano-lgas.json";
 
