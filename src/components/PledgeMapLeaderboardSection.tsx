@@ -356,11 +356,13 @@ const PledgeMapLeaderboardSection = () => {
                         </div>
                       </motion.div>
                     ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                   </div>
+
+                  <CampaignRulesPanel className="mt-6" />
+                 </motion.div>
+               )}
+             </AnimatePresence>
+           </motion.div>
         </div>
       </div>
 
