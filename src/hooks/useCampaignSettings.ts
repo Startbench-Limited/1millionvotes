@@ -2,12 +2,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+export interface PledgeThreshold {
+  label: string;
+  target: number;
+}
+
+export interface RewardTier {
+  name: string;
+  min_pledges: number;
+  tokens: number;
+}
+
 export interface CampaignSettings {
   id: string;
   name: string;
   start_date: string | null;
   end_date: string | null;
   is_active: boolean;
+  pledge_goal: number;
+  pledge_thresholds: PledgeThreshold[];
+  reward_tiers: RewardTier[];
+  redemption_rules: string | null;
+  show_rules_publicly: boolean;
 }
 
 export function useCampaignSettings() {
