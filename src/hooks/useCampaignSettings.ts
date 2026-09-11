@@ -32,52 +32,71 @@ export function useCampaignSettings() {
     queryFn: async (): Promise<CampaignSettings | null> => {
       const { data, error } = await supabase
         .from("campaign_settings")
-        .select("id, name, start_date, end_date, is_active")
+        .select("*")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      if (!data) return null;
+
+      const row = data as Record<string, unknown>;
+      return {
+        id: row.id as string,
+        name: (row.name as string) ?? "",
+        start_date: (row.start_date as string | null) ?? null,
+        end_date: (row.end_date as string | null) ?? null,
+        is_active: Boolean(row.is_active),
+        pledge_goal: Number(row.pledge_goal ?? 1000000),
+        pledge_thresholds: Array.isArray(row.pledge_thresholds)
+          ? (row.pledge_thresholds as PledgeThreshold[])
+          : [],
+        reward_tiers: Array.isArray(row.reward_tiers) ? (row.reward_tiers as RewardTier[]) : [],
+        redemption_rules: (row.redemption_rules as string | null) ?? null,
+        show_rules_publicly: row.show_rules_publicly !== false,
+      };
     },
   });
+}
+
+export interface CampaignSettingsInput {
+  id?: string;
+  name: string;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  pledge_goal?: number;
+  pledge_thresholds?: PledgeThreshold[];
+  reward_tiers?: RewardTier[];
+  redemption_rules?: string | null;
+  show_rules_publicly?: boolean;
 }
 
 export function useUpdateCampaignSettings() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (values: {
-      id?: string;
-      name: string;
-      start_date: string | null;
-      end_date: string | null;
-      is_active: boolean;
-    }) => {
-      if (values.id) {
+    mutationFn: async (values: CampaignSettingsInput) => {
+      const { id, ...rest } = values;
+      const payload = rest as Record<string, unknown>;
+
+      if (id) {
         const { error } = await supabase
           .from("campaign_settings")
-          .update({
-            name: values.name,
-            start_date: values.start_date,
-            end_date: values.end_date,
-            is_active: values.is_active,
-          })
-          .eq("id", values.id);
+          .update(payload)
+          .eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("campaign_settings").insert({
-          name: values.name,
-          start_date: values.start_date,
-          end_date: values.end_date,
-          is_active: values.is_active,
-        });
+        const { error } = await supabase
+          .from("campaign_settings")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .insert(payload as any);
         if (error) throw error;
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-settings"] });
-      toast({ title: "Campaign dates saved" });
+      toast({ title: "Campaign settings saved" });
     },
     onError: (e: Error) => {
       toast({ title: "Could not save", description: e.message, variant: "destructive" });
