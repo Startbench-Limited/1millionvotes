@@ -422,8 +422,9 @@ const AdminDashboard = () => {
           </TabsContent>
           {/* Campaign */}
           <TabsContent value="campaign">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl space-y-6">
               <CampaignSettingsCard />
+              <CampaignRulesCard />
             </div>
           </TabsContent>
         </Tabs>
