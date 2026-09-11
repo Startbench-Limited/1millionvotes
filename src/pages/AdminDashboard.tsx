@@ -33,6 +33,7 @@ import {
 } from "@/hooks/useContentMutations";
 import { ContentFormDialog, type ContentFormData } from "@/components/admin/ContentFormDialog";
 import CampaignSettingsCard from "@/components/admin/CampaignSettingsCard";
+import CampaignRulesCard from "@/components/admin/CampaignRulesCard";
 
 const chartConfig = {
   pledges: { label: "Pledges", color: "hsl(120, 100%, 25%)" },
@@ -422,8 +423,9 @@ const AdminDashboard = () => {
           </TabsContent>
           {/* Campaign */}
           <TabsContent value="campaign">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl space-y-6">
               <CampaignSettingsCard />
+              <CampaignRulesCard />
             </div>
           </TabsContent>
         </Tabs>

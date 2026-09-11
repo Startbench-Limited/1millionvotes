@@ -57,6 +57,11 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          pledge_goal: number
+          pledge_thresholds: Json
+          redemption_rules: string | null
+          reward_tiers: Json
+          show_rules_publicly: boolean
           start_date: string | null
           updated_at: string
         }
@@ -66,6 +71,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          pledge_goal?: number
+          pledge_thresholds?: Json
+          redemption_rules?: string | null
+          reward_tiers?: Json
+          show_rules_publicly?: boolean
           start_date?: string | null
           updated_at?: string
         }
@@ -75,6 +85,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          pledge_goal?: number
+          pledge_thresholds?: Json
+          redemption_rules?: string | null
+          reward_tiers?: Json
+          show_rules_publicly?: boolean
           start_date?: string | null
           updated_at?: string
         }

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MapBottomSheet from "@/components/MapBottomSheet";
 import CampaignPeriodBadge from "@/components/CampaignPeriodBadge";
+import CampaignRulesPanel from "@/components/CampaignRulesPanel";
 
 const GEO_URL = "/kano-lgas.json";
 
@@ -356,11 +357,13 @@ const PledgeMapLeaderboardSection = () => {
                         </div>
                       </motion.div>
                     ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                   </div>
+
+                  <CampaignRulesPanel className="mt-6" />
+                 </motion.div>
+               )}
+             </AnimatePresence>
+           </motion.div>
         </div>
       </div>
 
