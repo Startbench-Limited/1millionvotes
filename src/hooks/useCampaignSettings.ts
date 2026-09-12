@@ -13,6 +13,12 @@ export interface RewardTier {
   tokens: number;
 }
 
+export interface WardPledgeTarget {
+  lga: string;
+  ward: string;
+  target: number;
+}
+
 export interface CampaignSettings {
   id: string;
   name: string;
@@ -24,6 +30,7 @@ export interface CampaignSettings {
   reward_tiers: RewardTier[];
   redemption_rules: string | null;
   show_rules_publicly: boolean;
+  ward_pledge_targets: WardPledgeTarget[];
 }
 
 export function useCampaignSettings() {
@@ -54,6 +61,9 @@ export function useCampaignSettings() {
         reward_tiers: Array.isArray(row.reward_tiers) ? (row.reward_tiers as RewardTier[]) : [],
         redemption_rules: (row.redemption_rules as string | null) ?? null,
         show_rules_publicly: row.show_rules_publicly !== false,
+        ward_pledge_targets: Array.isArray(row.ward_pledge_targets)
+          ? (row.ward_pledge_targets as WardPledgeTarget[])
+          : [],
       };
     },
   });
@@ -70,6 +80,7 @@ export interface CampaignSettingsInput {
   reward_tiers?: RewardTier[];
   redemption_rules?: string | null;
   show_rules_publicly?: boolean;
+  ward_pledge_targets?: WardPledgeTarget[];
 }
 
 export function useUpdateCampaignSettings() {
