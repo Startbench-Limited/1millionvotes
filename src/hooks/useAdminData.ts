@@ -168,3 +168,99 @@ export function useCampaignContent() {
     },
   });
 }
+
+export interface VolunteerOverview {
+  userId: string;
+  name: string;
+  state: string | null;
+  lga: string | null;
+  tokens: number;
+  tasksTotal: number;
+  tasksCompleted: number;
+  taskTokens: number;
+  tasks: { id: string; task: string; status: string; tokens_reward: number; deadline: string | null }[];
+  pledges: { id: string; created_at: string; status: string; lga: string; ward: string }[];
+}
+
+export function useVolunteerOverview() {
+  return useQuery({
+    queryKey: ["admin-volunteer-overview"],
+    queryFn: async (): Promise<VolunteerOverview[]> => {
+      const { data: tasks, error } = await supabase
+        .from("volunteers")
+        .select("id, user_id, task, status, tokens_reward, deadline, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+
+      const userIds = Array.from(new Set((tasks ?? []).map((t) => t.user_id)));
+      if (userIds.length === 0) return [];
+
+      const [{ data: profiles }, { data: pledges }] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, state, lga, reward_tokens").in("user_id", userIds),
+        supabase.from("pledges").select("id, user_id, created_at, status, lga, ward").in("user_id", userIds),
+      ]);
+
+      const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+
+      return userIds.map((uid) => {
+        const p = profileMap.get(uid);
+        const myTasks = (tasks ?? []).filter((t) => t.user_id === uid);
+        return {
+          userId: uid,
+          name: p?.full_name ?? "Unknown volunteer",
+          state: p?.state ?? null,
+          lga: p?.lga ?? null,
+          tokens: p?.reward_tokens ?? 0,
+          tasksTotal: myTasks.length,
+          tasksCompleted: myTasks.filter((t) => t.status === "completed").length,
+          taskTokens: myTasks
+            .filter((t) => t.status === "completed")
+            .reduce((sum, t) => sum + (t.tokens_reward ?? 0), 0),
+          tasks: myTasks.map((t) => ({
+            id: t.id,
+            task: t.task,
+            status: t.status,
+            tokens_reward: t.tokens_reward ?? 0,
+            deadline: t.deadline,
+          })),
+          pledges: (pledges ?? [])
+            .filter((pl) => pl.user_id === uid)
+            .map((pl) => ({
+              id: pl.id,
+              created_at: pl.created_at,
+              status: pl.status,
+              lga: pl.lga,
+              ward: pl.ward,
+            })),
+        };
+      }).sort((a, b) => b.tokens - a.tokens);
+    },
+  });
+}
+
+export interface AdminPledge {
+  id: string;
+  full_name: string;
+  phone: string;
+  state: string;
+  lga: string;
+  ward: string;
+  polling_unit: string;
+  status: string;
+  created_at: string;
+}
+
+export function useAdminPledges() {
+  return useQuery({
+    queryKey: ["admin-pledges"],
+    queryFn: async (): Promise<AdminPledge[]> => {
+      const { data, error } = await supabase
+        .from("pledges")
+        .select("id, full_name, phone, state, lga, ward, polling_unit, status, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
