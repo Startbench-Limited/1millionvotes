@@ -64,6 +64,7 @@ export type Database = {
           show_rules_publicly: boolean
           start_date: string | null
           updated_at: string
+          ward_pledge_targets: Json
         }
         Insert: {
           created_at?: string
@@ -78,6 +79,7 @@ export type Database = {
           show_rules_publicly?: boolean
           start_date?: string | null
           updated_at?: string
+          ward_pledge_targets?: Json
         }
         Update: {
           created_at?: string
@@ -92,6 +94,7 @@ export type Database = {
           show_rules_publicly?: boolean
           start_date?: string | null
           updated_at?: string
+          ward_pledge_targets?: Json
         }
         Relationships: []
       }
