@@ -1,21 +1,18 @@
 import { useMemo, useState } from "react";
-import { Search, ListChecks } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Search, ListChecks, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminPledges } from "@/hooks/useAdminData";
-
-const statusColor = (s: string) =>
-  s === "verified"
-    ? "bg-primary/10 text-primary border-primary/20"
-    : s === "pending"
-      ? "bg-alert/10 text-alert-foreground border-alert/20"
-      : "bg-destructive/10 text-destructive border-destructive/20";
+import { useDeletePledge, useUpdatePledgeStatus } from "@/hooks/useAdminMutations";
 
 const PledgeListPanel = () => {
   const { data, isLoading } = useAdminPledges();
+  const updateStatus = useUpdatePledgeStatus();
+  const deletePledge = useDeletePledge();
   const [query, setQuery] = useState("");
 
   const rows = useMemo(() => {
